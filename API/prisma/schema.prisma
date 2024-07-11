@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:123456@localhost:5432/whatsapp-support?schema=public"
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  password  String
+  status    Boolean   @default(false)
+  role      Roles     @default(USER)
+  messages  Message[]
+  createdAt DateTime  @default(now())
+}
+
+model Customer {
+  id          Int       @id @default(autoincrement())
+  username    String?
+  pushname    String?
+  phoneNumber String    @unique
+  profilePic  String?
+  messages    Message[]
+  chat        Chat[]
+  createdAt   DateTime  @default(now())
+}
+
+model Chat {
+  id           Int       @id @default(autoincrement())
+  messages     Message[]
+  notification Boolean
+  customer     Customer? @relation(fields: [customerId], references: [id])
+  customerId   Int?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Message {
+  id            Int             @id @default(autoincrement())
+  hasMedia      Boolean
+  message       String
+  hasFixed      Boolean         @default(false)
+  hasMarked     Boolean         @default(false)
+  user          User?           @relation(fields: [userId], references: [id])
+  userId        Int?
+  customer      Customer?       @relation(fields: [customerId], references: [id])
+  customerId    Int?
+  createdAt     DateTime        @default(now())
+  messageDetail MessageDetails?
+  chat          Chat?           @relation(fields: [chatId], references: [id])
+  chatId        Int?
+  file          File?
+}
+
+model File {
+  id        Int     @id @default(autoincrement())
+  media     String?
+  mediaType String?
+  filename  String?
+  messageId Int     @unique
+  message   Message @relation(fields: [messageId], references: [id])
+}
+
+model MessageDetails {
+  id         Int       @id @default(autoincrement())
+  detail     String?
+  endDate    DateTime?
+  message    Message   @relation(fields: [messageId], references: [id])
+  messageId  Int       @unique
+  topic      Topic?    @relation(fields: [topicId], references: [id])
+  topicId    Int?
+  subTopic   SubTopic? @relation(fields: [subTopicId], references: [id])
+  subTopicId Int?
+}
+
+model Topic {
+  id        Int              @id @default(autoincrement())
+  topicName String
+  subTopic  SubTopic?
+  Chat      MessageDetails[]
+}
+
+model SubTopic {
+  id           Int              @id @default(autoincrement())
+  subTopicName String
+  topicId      Int              @unique
+  topic        Topic            @relation(fields: [topicId], references: [id])
+  Chat         MessageDetails[]
+}
+
+enum Roles {
+  ADMIN
+  USER
+}

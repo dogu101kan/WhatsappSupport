@@ -1,0 +1,9 @@
+config/
+node_modules/
+.wwebjs_auth/
+.wwebjs_cache/
+media_base64/files_and_medias/**
+!media_base64/files_and_medias/**/
+!media_base64/files_and_medias/**/.gitkeep
+coverage/
+token/
